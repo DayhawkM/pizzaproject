@@ -50,6 +50,15 @@
             padding: 10px 20px;
             text-align: center;
         }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -59,6 +68,10 @@
             <div class="auth-buttons">
                 @auth
                     <a href="{{ url('/dashboard') }}">Dashboard</a>
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log out</a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
                 @else
                     <a href="{{ route('login') }}">Log in</a>
                     @if (Route::has('register'))
@@ -72,6 +85,17 @@
     <div class="content">
         <h1>Enjoy Our Delicious Pizza</h1>
         <p>Discover a variety of pizzas made with fresh ingredients and love!</p>
+        <h1>Current Pizzas</h1>
+        <ul>
+            @foreach ($pizzas as $pizza)
+                <li>{{ $pizza->name }} - {{ $pizza->toppings}} - {{ $pizza->s_price}} - {{ $pizza->m_price}} - {{ $pizza->l_price}}</li>
+            @endforeach
+        </ul>
+        <h1> Current Toppings</h1>
+        <ul>
+            @foreach ($toppings as $topping)
+                <li>{{$topping->name}}</li>
+            @endforeach
     </div>
 
     <div class="footer">
