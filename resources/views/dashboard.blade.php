@@ -126,7 +126,8 @@
             <button type="button" onclick="placeOrder()">Place Order</button>
         </div>
     <div class="content">
-        <form id="order-form">
+    <form id="order-form" action="/store-order" method="POST">
+    @csrf
         <label>Select Pizza:</label>
 <select id="pizza-select">
     <option value="" disabled selected>Choose a pizza</option>
@@ -228,14 +229,35 @@
 
     // Function to place order
     function placeOrder() {
-        // Send order data to server or handle it as needed
-        console.log(order);
-        console.log('Total:', total);
+    // Send order data to server
+    fetch('/store-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include Laravel CSRF token
+        },
+        body: JSON.stringify(order)
+    })
+    .then(response => {
+        if (response.ok) {
+            // Handle success response
+            console.log('Order placed successfully');
+            // Optionally, you can reset the form and display a success message
+        } else {
+            // Handle error response
+            console.error('Failed to place order');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
         // Reset order array and total
         order = [];
         total = 0;
         updateOrderSummary();
-    }
+    });
+}
 
     // Call addEventListeners function when the document is loaded
     document.addEventListener('DOMContentLoaded', function () {

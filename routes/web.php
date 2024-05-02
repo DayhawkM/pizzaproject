@@ -22,6 +22,7 @@ Route::post('/logout', function () {
     request()->session()->invalidate();
     return redirect('/');
 })->name('logout');
+Route::post('/store-order', [OrderController::class, 'store']);
 
 // Route for the dashboard
 Route::get('/dashboard', [PizzaController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
