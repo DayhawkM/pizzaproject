@@ -8,16 +8,13 @@ use App\Models\Topping;
 
 class PizzaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $pizzas = \App\Models\Pizza::all(); 
-        $toppings = Topping::all(); 
-        return view('welcome', compact('pizzas', 'toppings')); 
+        $pizzas = Pizza::all();
+        $toppings = Topping::all(); // Remove or adjust if you don't have this model
+        return view('welcome', compact('pizzas', 'toppings'));
     }
-
+    
     public function dashboard()
 {
     $pizzas = \App\Models\Pizza::all(); 

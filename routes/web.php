@@ -16,7 +16,7 @@ use App\Http\Controllers\PizzaController;
 */
 
 // Route to display pizzas
-Route::get('/', [PizzaController::class, 'index']);
+Route::get('/', [PizzaController::class, 'index']);Route::get('/', [PizzaController::class, 'index']);
 
 Route::post('/logout', function () {
     request()->session()->invalidate();

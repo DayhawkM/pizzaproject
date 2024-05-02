@@ -10,11 +10,11 @@ class CreatePizzasTable extends Migration
     {
         Schema::create('pizzas', function (Blueprint $table) {
             $table->id();
-            // Add other columns here
+            $table->string('name');
+            $table->string('toppings');
             $table->decimal('s_price', 8, 2)->nullable();
             $table->decimal('m_price', 8, 2)->nullable();
             $table->decimal('l_price', 8, 2)->nullable();
-            // Do not add 'toppings' column again here
             $table->timestamps();
         });
     }

@@ -152,6 +152,7 @@
             </select>
 
             <button type="button" onclick="addToOrder()">Add to Order</button>
+            <button type="button" onclick="placeOrder()">Submit Order</button>
         </form>
 
 
