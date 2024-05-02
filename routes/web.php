@@ -15,7 +15,7 @@ use App\Http\Controllers\PizzaController;
 |
 */
 
-// Correct route to display pizzas
+// Route to display pizzas
 Route::get('/', [PizzaController::class, 'index']);
 
 Route::post('/logout', function () {
@@ -23,9 +23,8 @@ Route::post('/logout', function () {
     return redirect('/');
 })->name('logout');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route for the dashboard
+Route::get('/dashboard', [PizzaController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

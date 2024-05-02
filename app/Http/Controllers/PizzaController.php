@@ -15,8 +15,15 @@ class PizzaController extends Controller
     {
         $pizzas = \App\Models\Pizza::all(); 
         $toppings = Topping::all(); 
-        return view('welcome', compact('pizzas', 'toppings')); // Pass the 'pizzas' variable to the view
+        return view('welcome', compact('pizzas', 'toppings')); 
     }
+
+    public function dashboard()
+{
+    $pizzas = \App\Models\Pizza::all(); 
+    $toppings = Topping::all(); 
+    return view('dashboard', compact('pizzas', 'toppings')); // Pass the 'pizzas' and 'toppings' variables to the dashboard view
+}
 
     /**
      * Show the form for creating a new resource.
