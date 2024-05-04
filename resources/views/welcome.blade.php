@@ -88,7 +88,7 @@
         <h1>Current Pizzas</h1>
         <ul>
             @foreach ($pizzas as $pizza)
-                <li>{{ $pizza->name }} - {{ $pizza->toppings}} - {{ $pizza->s_price}} - {{ $pizza->m_price}} - {{ $pizza->l_price}}</li>
+                <li>{{ $pizza->name }} - {{ $pizza->toppings}} - Small: £{{ $pizza->s_price}} - Medium: £{{ $pizza->m_price}} - Large: £{{ $pizza->l_price}}</li>
             @endforeach
         </ul>
         <h1> Current Toppings</h1>

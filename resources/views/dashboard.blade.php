@@ -104,6 +104,7 @@
             <div class="auth-buttons">
                 @auth
                     <a href="{{ url('/dashboard') }}">Dashboard</a>
+                    <a href="{{ url('/orders') }}" class="btn btn-primary">View Orders</a>
                     <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log out</a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
@@ -126,7 +127,7 @@
             <button type="button" onclick="placeOrder()">Place Order</button>
         </div>
     <div class="content">
-    <form id="order-form" action="/store-order" method="POST">
+    <form id="order-form" action="/orders" method="POST">
     @csrf
         <label>Select Pizza:</label>
 <select id="pizza-select">
@@ -230,33 +231,28 @@
 
     // Function to place order
     function placeOrder() {
-    // Send order data to server
-    fetch('/store-order', {
+    const formData = {
+        pizza_id: document.getElementById('pizza-select').value,
+        size: document.getElementById('pizza-select').options[document.getElementById('pizza-select').selectedIndex].text,
+        toppings: Array.from(document.querySelectorAll('#topping-select input[type="checkbox"]:checked')).map(checkbox => checkbox.value),
+        delivery_type: document.getElementById('delivery-type').value,
+        total_price: parseFloat(document.getElementById('total').textContent)
+    };
+
+    fetch('/orders', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include Laravel CSRF token
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Ensure CSRF token is included if using a meta tag
         },
-        body: JSON.stringify(order)
+        body: JSON.stringify(formData)
     })
-    .then(response => {
-        if (response.ok) {
-            // Handle success response
-            console.log('Order placed successfully');
-            // Optionally, you can reset the form and display a success message
-        } else {
-            // Handle error response
-            console.error('Failed to place order');
-        }
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
     })
-    .catch(error => {
+    .catch((error) => {
         console.error('Error:', error);
-    })
-    .finally(() => {
-        // Reset order array and total
-        order = [];
-        total = 0;
-        updateOrderSummary();
     });
 }
 

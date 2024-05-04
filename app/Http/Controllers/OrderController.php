@@ -2,24 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Order;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function store(Request $request)
+    public function index()
     {
-        // Validate the request data if needed
-
-        $order = new Order();
-        $order->pizza_id = $request->pizza_id;
-        $order->toppings = $request->toppings;
-        $order->delivery_type = $request->delivery_type;
-        $order->total_price = $request->total_price;
-
-        // Save the order
-        $order->save();
-
-        // Optionally, you can return a response indicating success or redirect the user
+        $orders = Order::with('user', 'pizza')->get(); // Make sure relationships are defined in the models
+        return view('orders', ['orders' => $orders]);
     }
+    public function store(Request $request)
+{
+    $validated = $request->validate([
+        'pizza_id' => 'required|integer',
+        'size' => 'required|string',
+        'toppings' => 'required|array',
+        'delivery_type' => 'required|string',
+        'total_price' => 'required|numeric',
+    ]);
+
+    $order = Order::create([
+        'user_id' => auth()->id(), // assuming users are logged in to place orders
+        'pizza_id' => $validated['pizza_id'],
+        'size' => $validated['size'],
+        'toppings' => json_encode($validated['toppings']), // storing toppings as JSON
+        'delivery_type' => $validated['delivery_type'],
+        'total_price' => $validated['total_price'],
+    ]);
+
+    return response()->json(['message' => 'Order successfully created', 'order' => $order]);
+}
 }
