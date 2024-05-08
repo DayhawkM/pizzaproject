@@ -98,48 +98,34 @@
         }
     </style>
 </head>
-<div class="header">
+<body>
+    <div class="header">
         Welcome to the Pizza Site
-        @if (Route::has('login'))
-            <div class="auth-buttons">
-                @auth
-                    <a href="{{ url('/dashboard') }}">Dashboard</a>
-                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log out</a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
-                @else
-                    <a href="{{ route('login') }}">Log in</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}">Register</a>
-                    @endif
-                @endauth
-            </div>
-        @endif
+       
     </div>
-<div id="order-summary">
-            <h2>Order Summary</h2>
-            <ul id="order-list">
-                <!-- Order items will be dynamically added here -->
-            </ul>
-            <p>Total: £<span id="total">0</span></p>
-            <button type="button" onclick="placeOrder()">Place Order</button>
-        </div>
+
+    <div id="order-summary">
+        <h2>Order Summary</h2>
+        <p>Current Pizza Total: £<span id="current-total">0</span></p>
+        <ul id="order-list"></ul>
+        <p>Total: £<span id="total">0</span></p>
+        <button type="button" onclick="placeOrder()">Place Order</button>
+    </div>
     <div class="content">
-    <form id="order-form" action="/store-order" method="POST">
-    @csrf
-        <label>Select Pizza:</label>
-<select id="pizza-select">
-    <option value="" disabled selected>Choose a pizza</option>
-    @foreach ($pizzas as $pizza)
-        <option value="{{ $pizza->id }}">{{ $pizza->name }} Small - £{{ $pizza->s_price }}</option>
-        <option value="{{ $pizza->id }}">{{ $pizza->name }} Medium - £{{ $pizza->m_price }}</option>
-        <option value="{{ $pizza->id }}">{{ $pizza->name }} Large  - £{{ $pizza->l_price }}</option>
-    @endforeach
-</select>
+        <form id="order-form" action="/store-order" method="POST">
+            @csrf
+            <label>Select Pizza:</label>
+            <select id="pizza-select">
+                <option value="" disabled selected>Choose a pizza</option>
+                @foreach ($pizzas as $pizza)
+                    <option value="{{ $pizza->id }}">{{ $pizza->name }} Small - £{{ $pizza->s_price }}</option>
+                    <option value="{{ $pizza->id }}">{{ $pizza->name }} Medium - £{{ $pizza->m_price }}</option>
+                    <option value="{{ $pizza->id }}">{{ $pizza->name }} Large - £{{ $pizza->l_price }}</option>
+                @endforeach
+            </select>
 
             <label for="topping-select">Select Extra Toppings (85p each):</label>
-            <ul id="topping-select" style="list-style-type: none; padding-left: 0;">
+            <ul id="topping-select">
                 @foreach ($toppings as $topping)
                     <li><input type="checkbox" name="toppings[]" value="{{ $topping->id }}">{{ $topping->name }}</li>
                 @endforeach
@@ -154,116 +140,104 @@
             <button type="button" onclick="addToOrder()">Add to Order</button>
             <button type="button" onclick="placeOrder()">Submit Order</button>
         </form>
-
-
     </div>
+
+
 
     <div class="footer">
         Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
     </div>
 
     <script>
-    let order = [];
-    let total = 0;
+        let order = [];
+        let total = 0;
 
-    // Function to add event listeners
-    function addEventListeners() {
-        const pizzaSelect = document.getElementById('pizza-select');
-        const toppingCheckboxes = document.querySelectorAll('#topping-select input[type="checkbox"]');
-        const deliveryType = document.getElementById('delivery-type');
+        function addEventListeners() {
+            const pizzaSelect = document.getElementById('pizza-select');
+            const toppingCheckboxes = document.querySelectorAll('#topping-select input[type="checkbox"]');
+            const deliveryType = document.getElementById('delivery-type');
 
-        // Add event listener for pizza selection
-        pizzaSelect.addEventListener('change', updateOrderSummary);
-
-        // Add event listener for topping selection
-        toppingCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateOrderSummary);
-        });
-
-        // Add event listener for delivery type selection
-        deliveryType.addEventListener('change', updateOrderSummary);
-    }
-
-    // Function to update order summary
-    function updateOrderSummary() {
-        const pizzaId = document.getElementById('pizza-select').value;
-        const pizzaName = document.getElementById('pizza-select').options[document.getElementById('pizza-select').selectedIndex].text;
-        const toppings = Array.from(document.querySelectorAll('#topping-select input[type="checkbox"]:checked')).map(checkbox => checkbox.nextSibling.textContent);
-        const deliveryType = document.getElementById('delivery-type').value;
-        const deliveryCost = deliveryType === 'delivery' ? 5 : 0;
-        const pizzaPrice = parseFloat(pizzaName.split(' - £')[1]);
-
-        const toppingCost = toppings.length * 0.85;
-        const totalPrice = pizzaPrice + toppingCost + deliveryCost;
-
-        total = totalPrice.toFixed(2);
-
-        // Update total displayed
-        document.getElementById('total').textContent = total;
-    }
-
-    // Function to add pizza to order
-    function addToOrder() {
-        const pizzaId = document.getElementById('pizza-select').value;
-        const pizzaName = document.getElementById('pizza-select').options[document.getElementById('pizza-select').selectedIndex].text;
-        const toppings = Array.from(document.querySelectorAll('#topping-select input[type="checkbox"]:checked')).map(checkbox => checkbox.nextSibling.textContent);
-        const deliveryType = document.getElementById('delivery-type').value;
-        const deliveryCost = deliveryType === 'delivery' ? 5 : 0;
-        const pizzaPrice = parseFloat(pizzaName.split(' - £')[1]);
-
-        const toppingCost = toppings.length * 0.85;
-        const totalPrice = pizzaPrice + toppingCost + deliveryCost;
-
-        order.push({
-            pizzaId,
-            pizzaName,
-            toppings,
-            pizzaPrice,
-            toppingCost,
-            deliveryType,
-            deliveryCost,
-            totalPrice
-        });
-
-        updateOrderSummary();
-    }
-
-    // Function to place order
-    function placeOrder() {
-    // Send order data to server
-    fetch('/store-order', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include Laravel CSRF token
-        },
-        body: JSON.stringify(order)
-    })
-    .then(response => {
-        if (response.ok) {
-            // Handle success response
-            console.log('Order placed successfully');
-            // Optionally, you can reset the form and display a success message
-        } else {
-            // Handle error response
-            console.error('Failed to place order');
+            pizzaSelect.addEventListener('change', updateOrderSummary);
+            toppingCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateOrderSummary);
+            });
+            deliveryType.addEventListener('change', updateOrderSummary);
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    })
-    .finally(() => {
-        // Reset order array and total
-        order = [];
-        total = 0;
-        updateOrderSummary();
-    });
-}
 
-    // Call addEventListeners function when the document is loaded
-    document.addEventListener('DOMContentLoaded', function () {
-        addEventListeners();
-    });
-</script>
+        function updateOrderSummary() {
+            const pizzaId = document.getElementById('pizza-select').value;
+            const pizzaName = document.getElementById('pizza-select').options[document.getElementById('pizza-select').selectedIndex].text;
+            const toppings = Array.from(document.querySelectorAll('#topping-select input[type="checkbox"]:checked')).map(checkbox => checkbox.nextSibling.textContent);
+            const deliveryType = document.getElementById('delivery-type').value;
+            const deliveryCost = deliveryType === 'delivery' ? 5 : 0;
+            const pizzaPrice = parseFloat(pizzaName.split(' - £')[1] || 0);
+
+            const toppingCost = toppings.length * 0.85;
+            const currentTotalPrice = pizzaPrice + toppingCost + deliveryCost;
+
+            // Update current total displayed
+            document.getElementById('current-total').textContent = currentTotalPrice.toFixed(2);
+        }
+
+        function addToOrder() {
+            const pizzaId = document.getElementById('pizza-select').value;
+            const pizzaName = document.getElementById('pizza-select').options[document.getElementById('pizza-select').selectedIndex].text;
+            const toppings = Array.from(document.querySelectorAll('#topping-select input[type="checkbox"]:checked')).map(checkbox => checkbox.nextSibling.textContent);
+            const deliveryType = document.getElementById('delivery-type').value;
+            const deliveryCost = deliveryType === 'delivery' ? 5 : 0;
+            const pizzaPrice = parseFloat(pizzaName.split(' - £')[1] || 0);
+
+            const toppingCost = toppings.length * 0.85;
+            const totalPrice = pizzaPrice + toppingCost + deliveryCost;
+
+            order.push({
+                pizzaId,
+                pizzaName,
+                toppings,
+                pizzaPrice,
+                toppingCost,
+                deliveryType,
+                deliveryCost,
+                totalPrice
+            });
+
+            total += totalPrice;
+
+            // Update total and reset form inputs
+            document.getElementById('total').textContent = total.toFixed(2);
+            document.getElementById('pizza-select').selectedIndex = 0;
+            document.querySelectorAll('#topping-select input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
+            document.getElementById('delivery-type').selectedIndex = 0;
+            document.getElementById('current-total').textContent = "0";
+        }
+
+        function placeOrder() {
+            fetch('/store-order', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ order: order, total: total })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Order placed successfully');
+                    window.location.href = '/cart';
+                } else {
+                    console.error('Failed to place order');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            addEventListeners();
+        });
+    </script>
 </body>
 </html>

@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->float('total_price');
+            $table->enum('delivery_type', ['collection', 'delivery']);
             $table->timestamps();
         });
     }

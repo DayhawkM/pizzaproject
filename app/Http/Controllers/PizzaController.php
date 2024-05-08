@@ -11,7 +11,7 @@ class PizzaController extends Controller
     public function index()
     {
         $pizzas = Pizza::all();
-        $toppings = Topping::all(); // Remove or adjust if you don't have this model
+        $toppings = Topping::all(); 
         return view('welcome', compact('pizzas', 'toppings'));
     }
     

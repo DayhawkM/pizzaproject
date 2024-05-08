@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PizzaController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,9 @@ Route::post('/logout', function () {
     request()->session()->invalidate();
     return redirect('/');
 })->name('logout');
-Route::post('/store-order', [OrderController::class, 'store']);
+
+Route::get('/orders/make', [OrderController::class, 'create'])->name('orders.make');
+Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 
 // Route for the dashboard
 Route::get('/dashboard', [PizzaController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');

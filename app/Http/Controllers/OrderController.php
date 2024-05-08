@@ -1,25 +1,36 @@
 <?php
 
-namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\Order;
 
 class OrderController extends Controller
 {
-    public function store(Request $request)
-    {
-        // Validate the request data if needed
+    public function addToOrder(Request $request) {
+        // Retrieve current order from session or initialize a new one
+        $order = session()->get('order', []);
+
+        // Add new item to the order
+        array_push($order, $request->all());
+
+        // Update session
+        session(['order' => $order]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function storeOrder(Request $request) {
+        $orderDetails = $request->input('order');
+        $totalPrice = $request->input('total');
 
         $order = new Order();
-        $order->pizza_id = $request->pizza_id;
-        $order->toppings = $request->toppings;
-        $order->delivery_type = $request->delivery_type;
-        $order->total_price = $request->total_price;
-
-        // Save the order
+        $order->user_id = auth()->id();  // Assuming you are handling authentication
+        $order->details = json_encode($orderDetails);
+        $order->total_price = $totalPrice;
         $order->save();
 
-        // Optionally, you can return a response indicating success or redirect the user
+        // Store order in session to display in the cart
+        session(['cart' => $order]);
+
+        return response()->json(['success' => true]);
     }
 }
