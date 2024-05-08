@@ -101,7 +101,22 @@
 <body>
     <div class="header">
         Welcome to the Pizza Site
-       
+        @if (Route::has('login'))
+            <div class="auth-buttons">
+                @auth
+                    <a href="{{ url('/dashboard') }}">Dashboard</a>
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log out</a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                @else
+                    <a href="{{ route('login') }}">Log in</a>
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}">Register</a>
+                    @endif
+                @endauth
+            </div>
+        @endif
     </div>
 
     <div id="order-summary">
@@ -112,17 +127,17 @@
         <button type="button" onclick="placeOrder()">Place Order</button>
     </div>
     <div class="content">
-        <form id="order-form" action="/store-order" method="POST">
-            @csrf
-            <label>Select Pizza:</label>
-            <select id="pizza-select">
-                <option value="" disabled selected>Choose a pizza</option>
-                @foreach ($pizzas as $pizza)
-                    <option value="{{ $pizza->id }}">{{ $pizza->name }} Small - £{{ $pizza->s_price }}</option>
-                    <option value="{{ $pizza->id }}">{{ $pizza->name }} Medium - £{{ $pizza->m_price }}</option>
-                    <option value="{{ $pizza->id }}">{{ $pizza->name }} Large - £{{ $pizza->l_price }}</option>
-                @endforeach
-            </select>
+    <form id="order-form" action="/store-order" method="POST">
+    @csrf
+        <label>Select Pizza:</label>
+<select id="pizza-select">
+    <option value="" disabled selected>Choose a pizza</option>
+    @foreach ($pizzas as $pizza)
+        <option value="{{ $pizza->id }}">{{ $pizza->name }} Small - £{{ $pizza->s_price }}</option>
+        <option value="{{ $pizza->id }}">{{ $pizza->name }} Medium - £{{ $pizza->m_price }}</option>
+        <option value="{{ $pizza->id }}">{{ $pizza->name }} Large  - £{{ $pizza->l_price }}</option>
+    @endforeach
+</select>
 
             <label for="topping-select">Select Extra Toppings (85p each):</label>
             <ul id="topping-select">
@@ -211,29 +226,37 @@
             document.getElementById('current-total').textContent = "0";
         }
 
-        function placeOrder() {
-            fetch('/store-order', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ order: order, total: total })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Order placed successfully');
-                    window.location.href = '/cart';
-                } else {
-                    console.error('Failed to place order');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+    // Function to place order
+    function placeOrder() {
+    // Send order data to server
+    fetch('/store-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include Laravel CSRF token
+        },
+        body: JSON.stringify(order)
+    })
+    .then(response => {
+        if (response.ok) {
+            // Handle success response
+            console.log('Order placed successfully');
+            // Optionally, you can reset the form and display a success message
+        } else {
+            // Handle error response
+            console.error('Failed to place order');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        // Reset order array and total
+        order = [];
+        total = 0;
+        updateOrderSummary();
+    });
+}
 
         document.addEventListener('DOMContentLoaded', function () {
             addEventListeners();
